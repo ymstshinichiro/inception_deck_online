@@ -7,6 +7,17 @@ export class ApiError extends Error {
   }
 }
 
+export interface ItemReview {
+  itemNumber: number;
+  goodPoints: string;
+  improvements: string;
+}
+
+export interface AIReview {
+  itemReviews: ItemReview[];
+  overallReview: string;
+}
+
 async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -84,5 +95,11 @@ export const api = {
     fetchApi<{ item: any }>(`/api/decks/${deckId}/items/${itemNumber}`, {
       method: 'PUT',
       body: JSON.stringify(data),
+    }),
+
+  // AI
+  reviewDeck: (deckId: number | string) =>
+    fetchApi<{ review: AIReview }>(`/api/ai/review/${deckId}`, {
+      method: 'POST',
     }),
 };

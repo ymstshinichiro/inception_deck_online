@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { api } from '../utils/api';
+import { api, type AIReview } from '../utils/api';
 import type { Deck, DeckItem } from '../types/index';
 import { INCEPTION_DECK_ITEMS } from '../types/index';
+import Toast from '../components/Toast';
 
 export default function DeckEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +14,9 @@ export default function DeckEditPage() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(true);
+  const [aiReview, setAiReview] = useState<AIReview | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
 
   useEffect(() => {
     loadDeck();
@@ -25,6 +29,19 @@ export default function DeckEditPage() {
       setContent(item?.content || '');
     }
   }, [currentItem, deck]);
+
+  // Cmd+S / Ctrl+S で保存
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [content, currentItem, id]);
 
   const loadDeck = async () => {
     if (!id) return;
@@ -50,23 +67,47 @@ export default function DeckEditPage() {
       await api.updateItem(id, currentItem, { content });
       // デッキを再読み込み
       await loadDeck();
-      alert('保存しました');
+      // 保存成功時はアラートなし
     } catch (error: any) {
-      alert('保存に失敗しました: ' + error.message);
+      setToast({ message: '保存に失敗しました: ' + error.message, type: 'error' });
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = async () => {
     if (currentItem > 1) {
+      await handleSave();
       setCurrentItem(currentItem - 1);
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentItem < 10) {
+      await handleSave();
       setCurrentItem(currentItem + 1);
+    }
+  };
+
+  const allItemsFilled = () => {
+    if (!deck?.items) return false;
+    const itemsMap = new Map(deck.items.map(item => [(item.item_number || item.itemNumber)!, item]));
+    return INCEPTION_DECK_ITEMS.every(item => {
+      const deckItem = itemsMap.get(item.number);
+      return deckItem?.content && deckItem.content.trim() !== '';
+    });
+  };
+
+  const handleAIReview = async () => {
+    if (!id) return;
+    setAiLoading(true);
+    try {
+      const response = await api.reviewDeck(id);
+      setAiReview(response.review);
+    } catch (error: any) {
+      alert('AIレビューの取得に失敗しました: ' + error.message);
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -150,6 +191,16 @@ export default function DeckEditPage() {
                   );
                 })}
               </nav>
+
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <button
+                  onClick={handleAIReview}
+                  disabled={!allItemsFilled() || aiLoading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-300 disabled:to-gray-400"
+                >
+                  {aiLoading ? 'AIレビュー中...' : 'AIで仕上げる'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -197,6 +248,72 @@ export default function DeckEditPage() {
                     次の質問 →
                   </button>
                 </div>
+
+                {aiReview && (
+                  <div className="mt-8 space-y-6">
+                    {/* 現在の質問に対するレビュー */}
+                    {(() => {
+                      const currentReview = aiReview.itemReviews.find(r => r.itemNumber === currentItem);
+                      if (currentReview) {
+                        return (
+                          <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 shadow-sm">
+                            <h3 className="font-bold text-gray-900 mb-4 flex items-center text-lg">
+                              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                                <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                                </svg>
+                              </div>
+                              この質問へのAIレビュー
+                            </h3>
+                            <div className="bg-white rounded-lg p-5 border border-blue-100 shadow-sm space-y-4">
+                              <div>
+                                <h4 className="font-semibold text-green-700 mb-2 flex items-center">
+                                  <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </svg>
+                                  良い点
+                                </h4>
+                                <p className="text-sm text-gray-800 leading-relaxed pl-7">
+                                  {currentReview.goodPoints}
+                                </p>
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-blue-700 mb-2 flex items-center">
+                                  <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                  </svg>
+                                  改善提案
+                                </h4>
+                                <p className="text-sm text-gray-800 leading-relaxed pl-7">
+                                  {currentReview.improvements}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+
+                    {/* 全体の総評 */}
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-6 shadow-sm">
+                      <h3 className="font-bold text-gray-900 mb-4 flex items-center text-lg">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                          <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                            <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        全体の総評
+                      </h3>
+                      <div className="bg-white rounded-lg p-5 border border-purple-100 shadow-sm">
+                        <p className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">
+                          {aiReview.overallReview}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -235,6 +352,15 @@ export default function DeckEditPage() {
           )}
         </div>
       </div>
+
+      {/* Toast通知 */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

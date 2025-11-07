@@ -1,0 +1,7 @@
+# Environment variables with API keys
+.dev.vars
+.env
+.env.local
+
+# Wrangler
+.wrangler/
