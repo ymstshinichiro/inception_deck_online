@@ -1,8 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  status: number;
+
+  constructor(status: number, message: string) {
     super(message);
+    this.status = status;
     this.name = 'ApiError';
   }
 }
@@ -24,10 +27,13 @@ async function fetchApi<T>(
 ): Promise<T> {
   const token = localStorage.getItem('token');
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
   };
+
+  if (options.headers) {
+    Object.assign(headers, options.headers);
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;

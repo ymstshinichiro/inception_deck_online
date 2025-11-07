@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
-import type { Deck, DeckItem } from '../types/index';
+import type { Deck } from '../types/index';
 import { INCEPTION_DECK_ITEMS } from '../types/index';
 
 export default function PresentationPrintPage() {

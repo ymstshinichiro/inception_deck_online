@@ -16,7 +16,11 @@ const app = new Hono<{ Bindings: Env }>();
 
 // CORS設定
 app.use('/*', cors({
-  origin: ['http://localhost:5173'],
+  origin: [
+    'http://localhost:5173',  // ローカル開発
+    'https://inception-deck-online.pages.dev',  // 本番環境
+    'https://*.inception-deck-online.pages.dev'  // プレビュー環境
+  ],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
