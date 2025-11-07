@@ -142,14 +142,14 @@ export default function PresentationPage() {
   const currentContent = itemsMap.get(currentSlide)?.content || '';
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 text-white flex flex-col">
       {/* ヘッダー */}
-      <header className="bg-gray-800 p-4 print:hidden">
+      <header className="bg-black/20 backdrop-blur-sm p-4 print:hidden border-b border-white/10">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
             <Link
               to={`/decks/${id}/edit`}
-              className="text-sm text-indigo-400 hover:text-indigo-300"
+              className="text-sm text-gray-300 hover:text-white font-medium transition-colors duration-200"
             >
               ← 編集に戻る
             </Link>
@@ -157,14 +157,14 @@ export default function PresentationPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm"
+              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200"
             >
               <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
               </svg>
               PDF印刷
             </button>
-            <div className="text-sm">
+            <div className="text-sm bg-white/10 px-4 py-2 rounded-lg font-medium">
               {currentSlide} / 10
             </div>
           </div>
@@ -173,23 +173,24 @@ export default function PresentationPage() {
 
       {/* スライドコンテンツ */}
       <main className="flex-1 flex items-center justify-center p-8">
-        <div className="max-w-4xl w-full">
-          <div className="text-center mb-8">
-            <div className="text-sm text-gray-400 mb-4">{itemInfo.description}</div>
-            <h1 className="text-4xl font-bold mb-8">{itemInfo.title}</h1>
+        <div className="max-w-5xl w-full">
+          <div className="text-center mb-12">
+            <div className="text-sm text-gray-400 mb-4 font-medium">{itemInfo.description}</div>
+            <h1 className="text-5xl font-bold mb-8 text-white">{itemInfo.title}</h1>
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-8 min-h-[300px]">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-10 min-h-[350px] border border-white/20 shadow-lg">
             {currentContent ? (
               <div className="prose prose-invert max-w-none">
-                <p className="text-lg whitespace-pre-wrap">{currentContent}</p>
+                <p className="text-2xl whitespace-pre-wrap leading-relaxed text-white">{currentContent}</p>
               </div>
             ) : (
-              <div className="text-center text-gray-500 py-12">
-                <p>この項目はまだ入力されていません</p>
+              <div className="text-center text-gray-300 py-16">
+                <div className="text-6xl mb-6">📝</div>
+                <p className="text-lg mb-4">この項目はまだ入力されていません</p>
                 <Link
                   to={`/decks/${id}/edit`}
-                  className="text-indigo-400 hover:text-indigo-300 text-sm mt-4 inline-block"
+                  className="text-gray-300 hover:text-white text-sm mt-4 inline-block font-medium underline decoration-2 underline-offset-4 transition-colors duration-200"
                 >
                   編集画面で入力する
                 </Link>
@@ -200,24 +201,24 @@ export default function PresentationPage() {
       </main>
 
       {/* ナビゲーション */}
-      <footer className="bg-gray-800 p-4 print:hidden">
+      <footer className="bg-black/20 backdrop-blur-sm p-6 print:hidden border-t border-white/10">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <button
             onClick={handlePrevious}
             disabled={currentSlide === 1}
-            className="px-6 py-2 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-8 py-3 bg-white/10 hover:bg-white/20 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed font-medium transition-all duration-200"
           >
             ← 前へ
           </button>
 
           {/* インジケーター */}
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             {INCEPTION_DECK_ITEMS.map((item) => (
               <button
                 key={item.number}
                 onClick={() => setCurrentSlide(item.number)}
-                className={`w-2 h-2 rounded-full ${
-                  currentSlide === item.number ? 'bg-indigo-500' : 'bg-gray-600'
+                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  currentSlide === item.number ? 'bg-gray-400 scale-125' : 'bg-white/30 hover:bg-white/50'
                 }`}
                 title={item.title}
               />
@@ -227,12 +228,12 @@ export default function PresentationPage() {
           <button
             onClick={handleNext}
             disabled={currentSlide === 10}
-            className="px-6 py-2 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-8 py-3 bg-white/10 hover:bg-white/20 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed font-medium transition-all duration-200"
           >
             次へ →
           </button>
         </div>
-        <div className="text-center text-xs text-gray-500 mt-4">
+        <div className="text-center text-sm text-gray-400 mt-4">
           ← → キーで移動 | Esc で編集画面に戻る
         </div>
       </footer>

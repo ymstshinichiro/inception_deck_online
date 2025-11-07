@@ -72,7 +72,7 @@ export default function DeckEditPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-gray-600">読み込み中...</div>
       </div>
     );
@@ -90,10 +90,10 @@ export default function DeckEditPage() {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* ヘッダー */}
-      <header className="bg-white shadow flex-shrink-0">
+      <header className="bg-white border-b border-gray-200 flex-shrink-0">
         <div className="px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div>
-            <Link to="/dashboard" className="text-sm text-indigo-600 hover:text-indigo-800 mb-2 block">
+            <Link to="/dashboard" className="text-sm text-gray-600 hover:text-gray-900 mb-2 block font-medium">
               ← ダッシュボードに戻る
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">{deck.title}</h1>
@@ -101,20 +101,20 @@ export default function DeckEditPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setShowHelp(!showHelp)}
-              className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium"
             >
               {showHelp ? 'ヘルプを隠す' : 'ヘルプを表示'}
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
+              className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? '保存中...' : '保存'}
             </button>
             <Link
               to={`/decks/${id}/present`}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              className="border-2 border-gray-700 hover:bg-gray-50 text-gray-700 hover:text-gray-900 px-6 py-2 rounded-lg font-medium transition-all duration-200 inline-flex items-center"
             >
               プレビュー
             </Link>
@@ -126,25 +126,25 @@ export default function DeckEditPage() {
         <div className="flex-1 flex overflow-hidden">
           {/* 左サイドバー */}
           <div className="w-64 bg-white border-r border-gray-200 overflow-y-auto">
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="font-semibold text-gray-900 mb-4">10の質問</h2>
-              <nav className="space-y-1">
+            <div className="p-4">
+              <h2 className="font-bold text-gray-900 mb-4">10の質問</h2>
+              <nav className="space-y-2">
                 {INCEPTION_DECK_ITEMS.map((item) => {
                   const hasContent = itemsMap.has(item.number) && itemsMap.get(item.number)?.content;
                   return (
                     <button
                       key={item.number}
                       onClick={() => setCurrentItem(item.number)}
-                      className={`w-full text-left px-3 py-2 rounded text-sm ${
+                      className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-all duration-200 ${
                         currentItem === item.number
-                          ? 'bg-indigo-100 text-indigo-900 font-medium'
+                          ? 'bg-gray-800 text-white font-semibold'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       <div className="flex items-center">
-                        <span className="mr-2">{item.number}.</span>
-                        <span className="flex-1">{item.title}</span>
-                        {hasContent && <span className="text-green-600">✓</span>}
+                        <span className="mr-2 font-bold">{item.number}.</span>
+                        <span className="flex-1 text-xs">{item.title}</span>
+                        {hasContent && <span className={currentItem === item.number ? 'text-green-300' : 'text-green-600'}>✓</span>}
                       </div>
                     </button>
                   );
@@ -157,24 +157,24 @@ export default function DeckEditPage() {
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto p-8">
               <div className="max-w-4xl mx-auto">
-                <div className="mb-6">
-                  <div className="text-sm text-gray-500 mb-2">
+                <div className="mb-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="text-sm text-gray-600 font-semibold mb-2">
                     質問 {currentItem} / 10
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-3">
                     {itemInfo.title}
                   </h2>
-                  <p className="text-gray-600">{itemInfo.description}</p>
+                  <p className="text-gray-600 text-lg">{itemInfo.description}</p>
                 </div>
 
                 <div className="mb-6">
-                  <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                    回答
+                  <label htmlFor="content" className="block text-sm font-semibold text-gray-700 mb-3">
+                    あなたの回答
                   </label>
                   <textarea
                     id="content"
                     rows={20}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-5 py-4 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 transition-all duration-200 text-gray-900 bg-white shadow-sm"
                     placeholder="こちらに回答を入力してください..."
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -185,14 +185,14 @@ export default function DeckEditPage() {
                   <button
                     onClick={handlePrevious}
                     disabled={currentItem === 1}
-                    className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     ← 前の質問
                   </button>
                   <button
                     onClick={handleNext}
                     disabled={currentItem === 10}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     次の質問 →
                   </button>
@@ -203,27 +203,31 @@ export default function DeckEditPage() {
 
           {/* 右ヘルプサイドバー */}
           {showHelp && (
-            <div className="w-96 bg-gray-50 border-l border-gray-200 overflow-y-auto p-6">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <svg className="h-5 w-5 text-indigo-600 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
+            <div className="w-96 bg-white border-l border-gray-200 overflow-y-auto p-6">
+              <h3 className="font-bold text-gray-900 mb-4 flex items-center text-lg">
+                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="h-5 w-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
                 ガイド
               </h3>
-              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-                <p className="text-sm text-blue-900">
+              <div className="bg-slate-50 border-l-4 border-slate-300 rounded-lg p-5 mb-6">
+                <p className="text-sm text-gray-800 leading-relaxed">
                   {itemInfo.guide}
                 </p>
               </div>
 
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <svg className="h-5 w-5 text-gray-600 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
+              <h3 className="font-bold text-gray-900 mb-4 flex items-center text-lg">
+                <div className="w-8 h-8 bg-stone-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="h-5 w-5 text-stone-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
                 具体例
               </h3>
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <p className="text-sm text-gray-700 whitespace-pre-line">
+              <div className="bg-stone-50 border border-stone-200 rounded-lg p-5">
+                <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
                   {itemInfo.example}
                 </p>
               </div>
