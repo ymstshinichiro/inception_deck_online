@@ -1,0 +1,29 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create inception-deck-db",
+    "db:migrate:local": "wrangler d1 migrations apply inception-deck-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply inception-deck-db --remote"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "hono": "^4.10.4",
+    "jose": "^6.1.0",
+    "wrangler": "^4.46.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251106.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^24.10.0",
+    "typescript": "^5.9.3"
+  }
+}
