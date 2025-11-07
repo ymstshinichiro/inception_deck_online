@@ -123,16 +123,24 @@ ${itemsContent}
     console.log('AI Response:', reviewText);
 
     // JSONレスポンスをパース
+    let reviewJson;
     try {
-      const reviewJson = JSON.parse(reviewText);
+      reviewJson = JSON.parse(reviewText);
       console.log('Successfully parsed JSON:', reviewJson);
-      return c.json({ review: reviewJson });
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', reviewText);
       console.error('Parse error:', parseError);
       // JSONパースに失敗した場合は、テキストとして返す
-      return c.json({ review: { overallReview: reviewText, itemReviews: [] } });
+      reviewJson = { overallReview: reviewText, itemReviews: [] };
     }
+
+    // レビューをデータベースに保存
+    const now = new Date().toISOString();
+    await c.env.DB.prepare(
+      'UPDATE inception_decks SET ai_review = ?, ai_reviewed_at = ? WHERE id = ?'
+    ).bind(JSON.stringify(reviewJson), now, deckId).run();
+
+    return c.json({ review: reviewJson });
   } catch (error) {
     console.error('AI review error:', error);
     return c.json({

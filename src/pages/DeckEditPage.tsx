@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api, type AIReview } from '../utils/api';
 import type { Deck, DeckItem } from '../types/index';
 import { INCEPTION_DECK_ITEMS } from '../types/index';
 import Toast from '../components/Toast';
+import LoadingModal from '../components/LoadingModal';
 
 export default function DeckEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +18,7 @@ export default function DeckEditPage() {
   const [aiReview, setAiReview] = useState<AIReview | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+  const aiReviewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadDeck();
@@ -51,6 +53,10 @@ export default function DeckEditPage() {
       // 最初のアイテムの内容を設定
       const firstItem = response.deck.items?.find((i: DeckItem) => (i.item_number || i.itemNumber) === 1);
       setContent(firstItem?.content || '');
+      // 保存されているAIレビューを読み込む
+      if (response.deck.aiReview) {
+        setAiReview(response.deck.aiReview);
+      }
     } catch (error) {
       console.error('Failed to load deck:', error);
       alert('デッキの読み込みに失敗しました');
@@ -104,8 +110,12 @@ export default function DeckEditPage() {
     try {
       const response = await api.reviewDeck(id);
       setAiReview(response.review);
+      // AIレビューが取得できたら、少し待ってからスクロール
+      setTimeout(() => {
+        aiReviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     } catch (error: any) {
-      alert('AIレビューの取得に失敗しました: ' + error.message);
+      setToast({ message: 'AIレビューの取得に失敗しました: ' + error.message, type: 'error' });
     } finally {
       setAiLoading(false);
     }
@@ -198,7 +208,7 @@ export default function DeckEditPage() {
                   disabled={!allItemsFilled() || aiLoading}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-300 disabled:to-gray-400"
                 >
-                  {aiLoading ? 'AIレビュー中...' : 'AIで仕上げる'}
+                  {aiLoading ? 'AIレビュー中...' : 'AIレビュー'}
                 </button>
               </div>
             </div>
@@ -250,7 +260,7 @@ export default function DeckEditPage() {
                 </div>
 
                 {aiReview && (
-                  <div className="mt-8 space-y-6">
+                  <div ref={aiReviewRef} className="mt-8 space-y-6">
                     {/* 現在の質問に対するレビュー */}
                     {(() => {
                       const currentReview = aiReview.itemReviews.find(r => r.itemNumber === currentItem);
@@ -360,6 +370,11 @@ export default function DeckEditPage() {
           type={toast.type}
           onClose={() => setToast(null)}
         />
+      )}
+
+      {/* AIレビューローディングモーダル */}
+      {aiLoading && (
+        <LoadingModal message="AIレビューを生成しています。処理に数分かかる場合があります..." />
       )}
     </div>
   );

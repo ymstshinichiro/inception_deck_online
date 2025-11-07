@@ -60,7 +60,7 @@ decks.get('/:id', async (c) => {
     const deckId = c.req.param('id');
 
     const deck = await c.env.DB.prepare(
-      'SELECT id, user_id, title, description, created_at, updated_at FROM inception_decks WHERE id = ? AND user_id = ?'
+      'SELECT id, user_id, title, description, created_at, updated_at, ai_review, ai_reviewed_at FROM inception_decks WHERE id = ? AND user_id = ?'
     ).bind(deckId, userId).first() as any;
 
     if (!deck) {
@@ -72,6 +72,16 @@ decks.get('/:id', async (c) => {
       'SELECT id, item_number, content, created_at, updated_at FROM deck_items WHERE deck_id = ? ORDER BY item_number'
     ).bind(deckId).all();
 
+    // AIレビューをパース（存在する場合）
+    let aiReview = null;
+    if (deck.ai_review) {
+      try {
+        aiReview = JSON.parse(deck.ai_review);
+      } catch (e) {
+        console.error('Failed to parse ai_review:', e);
+      }
+    }
+
     return c.json({
       deck: {
         id: deck.id,
@@ -81,6 +91,8 @@ decks.get('/:id', async (c) => {
         createdAt: deck.created_at,
         updatedAt: deck.updated_at,
         items: items.results,
+        aiReview,
+        aiReviewedAt: deck.ai_reviewed_at,
       },
     });
   } catch (error) {
