@@ -8,6 +8,8 @@ export default function DashboardPage() {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [newDeckTitle, setNewDeckTitle] = useState('');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -26,19 +28,29 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCreateDeck = async () => {
-    const title = prompt('デッキのタイトルを入力してください:');
-    if (!title) return;
+  const handleCreateDeck = () => {
+    setNewDeckTitle('');
+    setShowModal(true);
+  };
+
+  const handleConfirmCreate = async () => {
+    if (!newDeckTitle.trim()) return;
 
     setCreating(true);
     try {
-      const response = await api.createDeck({ title });
+      const response = await api.createDeck({ title: newDeckTitle });
+      setShowModal(false);
       navigate(`/decks/${response.deck.id}/edit`);
     } catch (error: any) {
       alert('デッキの作成に失敗しました: ' + error.message);
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleCancelCreate = () => {
+    setShowModal(false);
+    setNewDeckTitle('');
   };
 
   const handleDeleteDeck = async (id: number) => {
@@ -147,6 +159,52 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* デッキ作成モーダル */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">新規デッキを作成</h3>
+            <div className="mb-6">
+              <label htmlFor="deck-title" className="block text-sm font-medium text-gray-700 mb-2">
+                デッキのタイトル
+              </label>
+              <input
+                id="deck-title"
+                type="text"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-200 transition-all duration-200 text-gray-900"
+                placeholder="例: 新規プロジェクトのインセプションデッキ"
+                value={newDeckTitle}
+                onChange={(e) => setNewDeckTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newDeckTitle.trim()) {
+                    handleConfirmCreate();
+                  } else if (e.key === 'Escape') {
+                    handleCancelCreate();
+                  }
+                }}
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelCreate}
+                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200"
+                disabled={creating}
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleConfirmCreate}
+                disabled={!newDeckTitle.trim() || creating}
+                className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creating ? '作成中...' : '作成'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

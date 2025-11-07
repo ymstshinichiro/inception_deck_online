@@ -210,6 +210,9 @@ export default function DeckEditPage() {
                 >
                   {aiLoading ? 'AIレビュー中...' : 'AIレビュー'}
                 </button>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  全ての項目を埋めるとAIレビューが可能になります
+                </p>
               </div>
             </div>
           </div>
