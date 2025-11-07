@@ -29,9 +29,9 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        <div className="text-center mb-10">
-          <h2 className="text-4xl font-bold text-gray-900 mb-2">
-            インセプションデッキ
+        <div className="text-center mb-10 flex flex-col items-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 whitespace-nowrap">
+            インセプションデッキをつくろう
           </h2>
           <p className="text-gray-600">
             アカウントを作成
