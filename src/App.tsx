@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import DeckEditPage from './pages/DeckEditPage';
 import PresentationPage from './pages/PresentationPage';
 import PresentationPrintPage from './pages/PresentationPrintPage';
+import Footer from './components/Footer';
 
 // 認証が必要なルートを保護
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -49,57 +50,62 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <LoginPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <SignupPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/decks/:id/edit"
-            element={
-              <ProtectedRoute>
-                <DeckEditPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/decks/:id/present"
-            element={
-              <ProtectedRoute>
-                <PresentationPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/decks/:id/print"
-            element={
-              <ProtectedRoute>
-                <PresentationPrintPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+        <div className="min-h-screen flex flex-col">
+          <div className="flex-1">
+            <Routes>
+              <Route
+                path="/login"
+                element={
+                  <PublicRoute>
+                    <LoginPage />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <PublicRoute>
+                    <SignupPage />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/decks/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <DeckEditPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/decks/:id/present"
+                element={
+                  <ProtectedRoute>
+                    <PresentationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/decks/:id/print"
+                element={
+                  <ProtectedRoute>
+                    <PresentationPrintPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </div>
+          <Footer />
+        </div>
       </AuthProvider>
     </BrowserRouter>
   );
